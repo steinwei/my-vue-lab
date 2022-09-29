@@ -1,15 +1,16 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <Cascade />
+  <NetCloundMusic />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Cascade from './components/cascade'
+import NetCloundMusic from './components/netcloud-music'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Cascade,
+    NetCloundMusic
   }
 }
 </script>
