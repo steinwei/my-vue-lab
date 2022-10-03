@@ -1,15 +1,17 @@
 <template>
     <div class="cascade">
-        <header>
+        <header class="header">
             <button @click="changeMethod">
                 Change another method.
             </button>
         </header>
-        <component :is="component" :column="count" :gutter="props.gutter || DEFAULT_GUTTER" />
+        <component :is="component.sceneId" :column="count" :gutter="props.gutter || DEFAULT_GUTTER">
+            <slot></slot>
+        </component>
     </div>
 </template>
 <script setup>
-import { ref, defineProps, onMounted, onUnmounted } from 'vue';
+import { ref, defineProps, onMounted, onUnmounted, reactive } from 'vue';
 import Absolute from './components/absolute';
 import Flex from './components/flex';
 import Column from './components/column';
@@ -45,15 +47,26 @@ const scene = {
     Column
 }
 
-const component = ref(scene.Flex)
+const component = reactive({
+    sceneId: scene.Flex
+})
 
 function changeMethod() {
-    return component.value == scene.Absolute ? scene.Column : scene.Absolute;
+    const keys = Object.keys(scene)
+    const rand = Math.floor(Math.random() * keys.length)
+    if (component.sceneId?.name == scene[keys[rand]]?.name) {
+        component.sceneId = scene[keys[(rand+1) % (keys.length - 1)]]
+    } else {
+        component.sceneId = scene[keys[rand]]
+    }
 }
 </script>
 
-<style>
+<style scoped>
 .cascade {
+    padding: 20px;
+}
+.header {
     padding: 20px;
 }
 </style>

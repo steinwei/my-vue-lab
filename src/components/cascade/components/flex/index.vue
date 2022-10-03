@@ -1,7 +1,7 @@
 <template>
-    <div class="cascade__wrapper">
-        <div class="cascade__item" :key="index" v-for="column, index in columns" :style="{gap: props.gutter + 'px'}">
-            <img :key="item.url" :src="item.url"  :style="{gap: props.gutter + 'px', maxWidth: item.maxWidth + 'px'}" v-for="item in column.children" />
+    <div class="wrapper">
+        <div class="item" :key="index" v-for="arr, index in items" :style="{gap: props.gutter + 'px'}">
+            <img :key="item.url" :src="item.url"  :style="{gap: props.gutter + 'px', maxWidth: item.maxWidth + 'px'}" v-for="item in arr.children" />
         </div>
     </div>
 </template>
@@ -19,7 +19,7 @@ import { computed, defineProps } from 'vue'
 import { data } from '../../utils/mock';
 
 const props = defineProps(['column', 'gutter'])
-const columns = computed(() => {
+const items = computed(() => {
     const arr = Array.from({ length: props.column }, () => ({ children: [] }))
     const windowWidth = window.innerWidth
     data.forEach((item, index) => {
@@ -30,15 +30,15 @@ const columns = computed(() => {
 
 </script>
 
-<style>
-.cascade__wrapper{
+<style scoped>
+.wrapper{
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-content: stretch;
     flex-wrap: wrap;
 }
-.cascade__item{
+.item{
     display: flex;
     flex-direction: column;
     flex: 1;

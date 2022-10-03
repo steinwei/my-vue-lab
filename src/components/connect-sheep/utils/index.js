@@ -17,20 +17,20 @@ export class CardItem {
     };
     
     static contentType = {
-    1: "🥕",
-    2: "✂️",
-    3: "🥦",
-    4: "🥛",
-    5: "🌊",
-    6: "🧤",
-    7: "🧵",
-    8: "🌱",
-    9: "🔨",
-    10: "🌽",
-    11: "🌾",
-    12: "🐑",
-    13: "🪵",
-    14: "🔥",
+        1: "🥕",
+        2: "✂️",
+        3: "🥦",
+        4: "🥛",
+        5: "🌊",
+        6: "🧤",
+        7: "🧵",
+        8: "🌱",
+        9: "🔨",
+        10: "🌽",
+        11: "🌾",
+        12: "🐑",
+        13: "🪵",
+        14: "🔥",
     };
     
     constructor({x, y, z, key}) { 
@@ -66,6 +66,11 @@ export class Playground {
         this.cardMap = []
     }
 
+    init() { 
+        this.getMap()
+        this.setCardValue()
+    }
+
     getMap({ x, y, z, cardRandom = 0 }) {
         let canSetCard = false
         const cardMap = this.cardMap
@@ -97,6 +102,7 @@ export class Playground {
                         this.cardMap[x][y][z] = cardItem
                         this.CardItemList.push(cardItem)
                     }
+                    // TODO: 对称
                 }
             }
         }
@@ -109,15 +115,10 @@ export class Playground {
             const value = Math.ceil(Math.random() * maxCardType)
             if (valueMap[value]) {
                 item.setValue(item.val)
-                
             } else {
-
+                valueMap[value] = 0
             }
         })
-    }
-
-    init() { 
-        
     }
 
     removeThree() { 
