@@ -16,23 +16,6 @@ export class CardItem {
         14: { background: "#CCDDFF" },
     };
     
-    static contentType = {
-        1: "🥕",
-        2: "✂️",
-        3: "🥦",
-        4: "🥛",
-        5: "🌊",
-        6: "🧤",
-        7: "🧵",
-        8: "🌱",
-        9: "🔨",
-        10: "🌽",
-        11: "🌾",
-        12: "🐑",
-        13: "🪵",
-        14: "🔥",
-    };
-    
     constructor({x, y, z, key}) { 
         this.x = x
         this.y = y
@@ -49,7 +32,7 @@ export class CardItem {
 
     setValue(val) {
         this.val = val;
-        Object.assign(this.style, CardItem.contentType[val])
+        Object.assign(this.style, CardItem.colorType[val])
     }
 
 }
@@ -67,7 +50,8 @@ export class Playground {
     }
 
     init() { 
-        this.getMap()
+        const { x, y, z } = this.options
+        this.getMap({x, y, z})
         this.setCardValue()
     }
 
@@ -121,10 +105,6 @@ export class Playground {
         })
     }
 
-    removeThree() { 
-
-    }
-
     moveToLeft(item) {
         setTimeout(() => {
             item.style.left = ""
@@ -163,4 +143,19 @@ export class Playground {
             item.cover = true
         }
     }
+}
+
+export class Toolits {
+    constructor(options) {
+        this.options = {
+            ...options
+        }
+    }
+    
+    removeThree() {
+
+    }
+
+
+
 }
