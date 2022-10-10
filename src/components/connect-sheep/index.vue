@@ -4,13 +4,13 @@
         <div class="container" v-if="options.scene == 1" :style="CardWrapStyle">
             <div class="card-item" :key="item.key" v-for="item in CardList" :class="{'item-cover': item.cover}" 
             @click="handleCardClick(item)" :style="item.style" v-show="CardList.length > 0">
-                <!-- {{item?.content}} -->
+                {{item?.content}}
             </div>
             <div class="card-item" :key="item.key" v-for="item in PendingList" :style="item.style" v-show="PendingList.length > 0">
-                <!-- {{item?.content}} -->
+                {{item?.content}}
             </div>
             <div class="card-item clear-item" :key="item.key" v-for="item in ClearList" :style="item.style" v-show="ClearList.length > 0" >
-                <!-- {{item?.content}} -->
+                {{item?.content}}
             </div>
             <div class="tips">
                 <span>
@@ -80,6 +80,23 @@ class CardItem {
     maxType: { background: "#CCDDFF" },
   }
 
+  static contentType = {
+    1: "🥕",
+    2: "✂️",
+    3: "🥦",
+    4: "🥛",
+    5: "🌊",
+    6: "🧤",
+    7: "🧵",
+    8: "🌱",
+    9: "🔨",
+    10: "🌽",
+    11: "🌾",
+    12: "🐑",
+    13: "🪵",
+    14: "🔥",
+  };
+
   static defaultProper = {
     width: 45,
     height: 45,
@@ -104,9 +121,10 @@ class CardItem {
 
   setValue(value){
     this.value = value
+    this.content = CardItem.contentType[value]
     this.style = {
       ...this.style,
-      ...CardItem.bgColor[value],
+    //   ...CardItem.bgColor[value],
     }
   }
 }
@@ -114,21 +132,28 @@ class CardItem {
 class Tool {
     constructor() {}
     removeThree() {
-        const item = PendingList[PendingList.length-1]
-        const { value } = item
-        let cnt = 1
-        PendingList.some(item => {
-            if(item.value == value) {
-                cnt++
+        let target = 0
+        PendingList.forEach((item, index, arr) => { 
+            if (ValMap[item.value] == 3) {
+                arr.forEach((ele, idx) => {
+                    if (ele.value == item.value) {
+                        setTimeout(() => {
+                            ele.style.left = item.offsetLeft - 60 + 'px'
+                            ele.style.top = "120%"
+                            ClearList.push(ele)
+                        }, 300);
+                    }
+                })
+                target = item.value
             }
         })
-        for(let i=0; i<CardList.length && cnt < 3; i++) {
-            const card = CardList[i]
-            if(card.value == value) {
-                PendingList.push(card)
-                cnt ++
+        
+        for (let i = PendingList.length - 1; i > -1; i--) {
+            if (PendingList[i].value == target) {
+                PendingList.splice(i, 1)
             }
         }
+
         removeThree()
     }
 
@@ -164,16 +189,16 @@ const tools = [
     }
 ]
 
-const CardWrapStyle = ref({
+const CardWrapStyle = {
     width: options.maxWidth * CardItem.defaultProper.width * 1.5 + 'px',
     height: options.maxHeight * CardItem.defaultProper.height * 1.5 + 'px',
-})
+}
 
-let CardList = ref([]).value
-let CardItemMap = ref([]).value
-let PendingList = ref([]).value
-let ClearList = ref([]).value
-let ValMap = ref({}).value
+let CardList = reactive(ref([])).value
+let CardItemMap = reactive(ref([])).value
+let PendingList = reactive(ref([])).value
+let ClearList = reactive(ref([])).value
+let ValMap = reactive(ref({})).value
 
 function init() {
     createMap()
@@ -280,58 +305,73 @@ function setCardValue() {
 }
 
 function handleCardClick(item) {
-    console.log(item.value, ValMap)
 
     removeThree()
     PendingList.push(item)
-    ValMap[item.value]++
-    CardList.splice(item, 1)
-    calculateCover(item)
+
+    if (ValMap[item.value]) {
+        ValMap[item.value]++
+    } else {
+        ValMap[item.value] = 1
+    }
     
-    setTimeout(() => {
+    const index = CardList.indexOf(item)
+    CardList.splice(index, 1)
+
+    calculateCover()
+    
+    delay(() => {
         removeThree()
-    }, 300);   
+    });   
 }
 
 function removeThree() {
-    PendingList.forEach((item, index, arr) => {
-        if(ValMap[item.value] == 3) {
-            arr.forEach(element => {
-                if(element.value == item.value) {
-                    ClearList.push(element)
-                }
-            });
-
-            ClearList.forEach(element => {
-                setTimeout(() => {
-                    element.style.left = item.offsetLeft - 60 + 'px'
-                    element.style.top = "120%"
-                }, 300);
-            });
-            
-            ValMap[item.value] = 0
-            // resort pendinglist
-            arr.forEach((ele, idx) => {
-                setTimeout(() => {
-                    item.style.left = item.offsetLeft + idx * CardItem.defaultProper.width + 'px'
+    const n = PendingList.length
+    if (n >= 3) {
+        const last = PendingList[n - 1], curr = PendingList[n - 2], prev = PendingList[n - 3]
+        if (last.value == curr.value && curr.value == prev.value) {
+            for (let i = 0; i < 3; i++) {
+                PendingList.pop()
+            }
+            ClearList.push(last, curr, prev)
+            ClearList.forEach(item => {
+                delay(() => {
+                    item.style.left = item.offsetLeft - 60 + 'px'
                     item.style.top = "120%"
-                }, 300);
-            });
-        } else {
-            setTimeout(() => {
-                item.style.left = item.offsetLeft + index * CardItem.defaultProper.width + 'px'
-                item.style.top = "120%"
-            }, 300)
+                });
+            })
         }
+    }
+
+    // render
+    PendingList.forEach((item, index) => {
+        delay(() => {
+            item.style.left = item.offsetLeft + index * CardItem.defaultProper.width + 'px'
+            item.style.top = "120%"
+        });
     })
 
     // game lost
-    if(PendingList.length >= options.max) {
-        options.scene = 3
+    if (PendingList.length >= options.max) {
+        delay(() => {
+            options.scene = 3
+        })
     }
     // game win
-    if(CardList.length == 0) {
-        options.scene = 2
+    if (CardList.length == 0) {
+        delay(() => {
+            options.scene = 2
+        })
+    }
+}
+
+function delay(fn, timeout = 300) {
+    try {
+        setTimeout(() => {
+            fn && typeof fn == 'function' && fn()
+        }, timeout);
+    } catch (err) {
+        console.error(err)
     }
 }
 
@@ -351,12 +391,11 @@ function calculateCover() {
             item.cover = true
         }else {
             item.cover = false
-
-            CoverMap[x][y]= true
-            CoverMap[x+1][y]= true
-            CoverMap[x][y+1]= true
-            CoverMap[x+1][y+1]= true
         }
+        CoverMap[x][y]= true
+        CoverMap[x+1][y]= true
+        CoverMap[x][y+1]= true
+        CoverMap[x+1][y+1]= true
     }
 }
 
@@ -370,13 +409,16 @@ function restart() {
 }
 
 function reset() {
+    while (CardList.length) {
+        CardList.pop()
+    }
     while (PendingList.length) {
         PendingList.pop()
     }
     while (ClearList.length) {
         ClearList.pop()
     }
-    removeThree()
+    // removeThree()
     ValMap = Object.create({})
 }
 
